@@ -4,7 +4,7 @@ function App() {
   const [message, setMessage] = useState('Loading...')
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/test') // Use your backend's actual URL
+    fetch('http://localhost:5223/api/test') // Use your backend's actual URL
       .then(res => res.json())
       .then(data => setMessage(data.message))
       .catch(() => setMessage('Failed to connect'))
