@@ -52,7 +52,7 @@ export default function HeroDetail() {
     {
       queryKey: ["heroes"],
       queryFn: async () => {
-        const res = await fetch("http://localhost:5223/api/heroes");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes`)
         return res.json();
       },
     },
@@ -123,9 +123,7 @@ export default function HeroDetail() {
   const { data: matchups = [], isLoading } = useQuery<Matchup[]>({
     queryKey: ["matchups", id],
     queryFn: async () => {
-      const res = await fetch(
-        `http://localhost:5223/api/heroes/${id}/matchups`,
-      );
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes/${id}/matchups`)
       return res.json();
     },
   });

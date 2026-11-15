@@ -22,7 +22,7 @@ function Home() {
   const { data: heroes = [], isLoading, isError } = useQuery<Hero[]>({
     queryKey: ['heroes'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:5223/api/heroes')
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes`)
       if (!res.ok) throw new Error('Failed to fetch')
       return res.json()
     },
