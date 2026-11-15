@@ -59,7 +59,26 @@ function Home() {
   }, [heroes, attributeFilter, sortBy, searchQuery])
 
   // 3. EARLY RETURNS (Must come AFTER all hooks)
-  if (isLoading) return <div className="p-8 text-white">Loading heroes...</div>
+    if (isLoading) return (
+    <div className="min-h-screen bg-[#0b0c10] p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Fake Header */}
+        <div className="border-b border-[#2c303b] pb-4 mb-8 flex flex-col xl:flex-row justify-between gap-4">
+          <div className="h-9 w-64 bg-[#2c303b] rounded-sm animate-pulse"></div>
+          <div className="h-8 w-full xl:w-96 bg-[#2c303b] rounded-sm animate-pulse"></div>
+        </div>
+        
+        {/* Fake Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+          {/* Render 16 skeleton cards */}
+          {Array.from({ length: 16 }).map((_, index) => (
+            <HeroCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+  
   if (isError) return <div className="p-8 text-red-500">Error loading data.</div>
 
   // 4. THE UI
@@ -168,6 +187,22 @@ function Home() {
             )
           })}
         </div>
+      </div>
+    </div>
+  )
+}
+
+// A placeholder component that mimics the shape of a hero card
+function HeroCardSkeleton() {
+  return (
+    <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden flex flex-col h-36 animate-pulse">
+      {/* Image Placeholder */}
+      <div className="h-24 w-full bg-[#2c303b]"></div>
+      
+      {/* Text Placeholder */}
+      <div className="p-3 flex flex-col flex-grow justify-between">
+        <div className="h-3 bg-[#2c303b] rounded-sm w-3/4"></div>
+        <div className="h-3 bg-[#2c303b] rounded-sm w-1/2 mt-2"></div>
       </div>
     </div>
   )
