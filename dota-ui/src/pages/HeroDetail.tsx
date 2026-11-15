@@ -1,11 +1,21 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 interface Hero {
   id: number
   localized_name: string
   img: string
   primary_attr: string
+  // Bracket Stats (1 = Herald, 8 = Immortal)
+  "1_pick": number; "1_win": number;
+  "2_pick": number; "2_win": number;
+  "3_pick": number; "3_win": number;
+  "4_pick": number; "4_win": number;
+  "5_pick": number; "5_win": number;
+  "6_pick": number; "6_win": number;
+  "7_pick": number; "7_win": number;
+  "8_pick": number; "8_win": number;
 }
 
 interface Matchup {
@@ -18,7 +28,7 @@ export default function HeroDetail() {
   const { id } = useParams()
 
   // 1. Fetch all heroes (React Query will instantly load this from the cache, no extra network request!)
-  const { data: allHeroes = [] } = useQuery<Hero[]>({
+  const { data: allHeroes = [], isLoading: isHeroesLoading } = useQuery<Hero[]>({
     queryKey: ['heroes'],
     queryFn: async () => {
       const res = await fetch('http://localhost:5223/api/heroes')
@@ -29,6 +39,18 @@ export default function HeroDetail() {
   // Find the specific hero we are looking at based on the URL id
   const hero = allHeroes.find((h) => h.id === Number(id))
 
+    // Transform the raw OpenDota data into an array Recharts can understand
+  const bracketData = hero ? [
+    { name: 'Herald', winRate: hero["1_pick"] > 0 ? Number(((hero["1_win"] / hero["1_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Guardian', winRate: hero["2_pick"] > 0 ? Number(((hero["2_win"] / hero["2_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Crusader', winRate: hero["3_pick"] > 0 ? Number(((hero["3_win"] / hero["3_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Archon', winRate: hero["4_pick"] > 0 ? Number(((hero["4_win"] / hero["4_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Legend', winRate: hero["5_pick"] > 0 ? Number(((hero["5_win"] / hero["5_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Ancient', winRate: hero["6_pick"] > 0 ? Number(((hero["6_win"] / hero["6_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Divine', winRate: hero["7_pick"] > 0 ? Number(((hero["7_win"] / hero["7_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Immortal', winRate: hero["8_pick"] > 0 ? Number(((hero["8_win"] / hero["8_pick"]) * 100).toFixed(1)) : 0 },
+  ] : []
+
   // 2. Fetch the matchups for this specific hero
   const { data: matchups = [], isLoading } = useQuery<Matchup[]>({
     queryKey: ['matchups', id],
@@ -37,8 +59,15 @@ export default function HeroDetail() {
       return res.json()
     },
   })
+  
 
+  // 1. Wait for the master hero list to load first
+  if (isHeroesLoading) return <div className="p-8 text-white">Loading hero data...</div>
+  
+  // 2. If it's done loading and we still can't find the hero, THEN show not found
   if (!hero) return <div className="p-8 text-white">Hero not found.</div>
+  
+  // 3. Wait for the specific matchups to load
   if (isLoading) return <div className="p-8 text-white">Loading matchups...</div>
 
   return (
@@ -60,6 +89,24 @@ export default function HeroDetail() {
             <h1 className="text-4xl font-bold uppercase tracking-wide">{hero.localized_name}</h1>
             <p className="text-[#e3b04b] uppercase font-bold text-sm mt-1">{hero.primary_attr}</p>
           </div>
+        </div>
+
+                {/* Win Rate by Bracket Chart */}
+        <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-gray-300 mt-8">Win Rate by Skill Bracket</h2>
+        <div className="bg-[#15171e] border border-[#2c303b] rounded-sm p-4 h-80 w-full mb-8">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={bracketData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2c303b" vertical={false} />
+              <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+              {/* We set the domain to [40, 60] so the variations are highly visible */}
+              <YAxis domain={[40, 60]} stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip 
+                cursor={{ fill: '#1a1c23' }}
+                contentStyle={{ backgroundColor: '#0b0c10', borderColor: '#2c303b', color: '#fff' }}
+              />
+              <Bar dataKey="winRate" fill="#e3b04b" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
         {/* Matchups Table */}
