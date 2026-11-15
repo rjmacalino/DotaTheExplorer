@@ -81,6 +81,8 @@ function Home() {
 
   if (isError) return <div className="p-8 text-red-500">Error loading data.</div>
 
+  const hasNoResults = processedHeroes.length === 0
+
   // 4. THE UI
   return (
     <div className="min-h-screen bg-[#0b0c10] p-8">
@@ -141,52 +143,65 @@ function Home() {
           </div>
           {/* 👆 END OF NEW CONTAINER 👆 */}
         </div>
-        
+
         {/* The Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-          {processedHeroes.map((hero) => {
-            const winRate = hero.pub_pick > 0 
-              ? ((hero.pub_win / hero.pub_pick) * 100).toFixed(1) 
-              : '0.0'
+        {hasNoResults ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-[#15171e] border border-[#2c303b] rounded-sm">
+            <p className="text-gray-400 text-lg mb-4">No heroes found matching your search.</p>
+            <button 
+              onClick={() => { setSearchQuery(''); setAttributeFilter('all_heroes'); }}
+              className="px-4 py-2 bg-[#0b0c10] border border-[#2c303b] hover:border-[#e3b04b] text-white text-sm font-bold uppercase tracking-wider rounded-sm transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            {processedHeroes.map((hero) => {
+              const winRate = hero.pub_pick > 0 
+                ? ((hero.pub_win / hero.pub_pick) * 100).toFixed(1) 
+                : '0.0'
 
-            const attrColor = 
-              hero.primary_attr === 'str' ? 'text-red-500' :
-              hero.primary_attr === 'agi' ? 'text-green-500' :
-              hero.primary_attr === 'int' ? 'text-blue-500' :
-              'text-gray-300'
+              const attrColor = 
+                hero.primary_attr === 'str' ? 'text-red-500' :
+                hero.primary_attr === 'agi' ? 'text-green-500' :
+                hero.primary_attr === 'int' ? 'text-blue-500' :
+                'text-gray-300'
 
-            return (
-              <Link
-                to={`/hero/${hero.id}`}
-                key={hero.id} 
-                className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden hover:border-[#e3b04b] transition-colors duration-200 cursor-pointer flex flex-col"
-              >
-                <div className="relative h-24 w-full bg-black">
-                  <img
-                    src={`https://cdn.cloudflare.steamstatic.com${hero.img}`}
-                    alt={hero.localized_name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                
-                <div className="p-3 flex flex-col flex-grow">
-                  <h2 className="text-gray-100 font-semibold text-sm truncate uppercase tracking-tight">
-                    {hero.localized_name}
-                  </h2>
-                  
-                  <div className="flex justify-between items-center mt-auto pt-2">
-                    <span className={`text-xs font-bold uppercase ${attrColor}`}>
-                      {hero.primary_attr === 'all' ? 'Univ' : hero.primary_attr}
-                    </span>
-                    <span className="text-gray-300 font-mono text-sm">
-                      {winRate}%
-                    </span>
+              return (
+                <Link
+                  to={`/hero/${hero.id}`}
+                  key={hero.id} 
+                  className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden hover:border-[#e3b04b] transition-colors duration-200 cursor-pointer flex flex-col"
+                >
+                  <div className="relative h-24 w-full bg-black">
+                    <img
+                      src={`https://cdn.cloudflare.steamstatic.com${hero.img}`}
+                      alt={hero.localized_name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
+                  
+                  <div className="p-3 flex flex-col flex-grow">
+                    <h2 className="text-gray-100 font-semibold text-sm truncate uppercase tracking-tight">
+                      {hero.localized_name}
+                    </h2>
+                    
+                    <div className="flex justify-between items-center mt-auto pt-2">
+                      <span className={`text-xs font-bold uppercase ${attrColor}`}>
+                        {hero.primary_attr === 'all' ? 'Univ' : hero.primary_attr}
+                      </span>
+                      <span className="text-gray-300 font-mono text-sm">
+                        {winRate}%
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+        
       </div>
     </div>
   )
