@@ -14,7 +14,7 @@ interface Hero {
 function App() {
   // 1. ALL HOOKS MUST GO AT THE VERY TOP
   const [attributeFilter, setAttributeFilter] = useState('all_heroes')
-  const [sortBy, setSortBy] = useState('win_rate_desc')
+  const [sortBy, setSortBy] = useState('alphabetical')
 
   const { data: heroes = [], isLoading, isError } = useQuery<Hero[]>({
     queryKey: ['heroes'],
@@ -36,6 +36,8 @@ function App() {
     // We use [...filtered] to sort a copy, not the original array
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
+        case 'alphabetical': 
+          return a.localized_name.localeCompare(b.localized_name)
         case 'win_rate_desc': return getWinRate(b) - getWinRate(a)
         case 'win_rate_asc': return getWinRate(a) - getWinRate(b)
         case 'pick_rate_desc': return b.pub_pick - a.pub_pick
@@ -89,6 +91,7 @@ function App() {
               onChange={(e) => setSortBy(e.target.value)}
               className="bg-[#15171e] text-gray-300 text-xs font-bold uppercase tracking-wider border border-[#2c303b] rounded-sm px-2 py-1.5 outline-none focus:border-[#e3b04b] cursor-pointer"
             >
+              <option value="alphabetical">A - Z</option>
               <option value="win_rate_desc">Highest Win Rate</option>
               <option value="win_rate_asc">Lowest Win Rate</option>
               <option value="pick_rate_desc">Most Picked</option>
