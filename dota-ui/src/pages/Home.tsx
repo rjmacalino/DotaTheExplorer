@@ -70,15 +70,15 @@ function Home() {
         
         {/* Fake Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-          {/* Render 16 skeleton cards */}
-          {Array.from({ length: 16 }).map((_, index) => (
+          {/* Render 32 skeleton cards to fill large screens */}
+          {Array.from({ length: 32 }).map((_, index) => (
             <HeroCardSkeleton key={index} />
           ))}
         </div>
       </div>
     </div>
   )
-  
+
   if (isError) return <div className="p-8 text-red-500">Error loading data.</div>
 
   // 4. THE UI
@@ -195,14 +195,23 @@ function Home() {
 // A placeholder component that mimics the shape of a hero card
 function HeroCardSkeleton() {
   return (
-    <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden flex flex-col h-36 animate-pulse">
-      {/* Image Placeholder */}
-      <div className="h-24 w-full bg-[#2c303b]"></div>
+    // We copied the exact wrapper classes from the real card
+    <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden flex flex-col">
+      {/* Image Placeholder (h-24 matches the real image) */}
+      <div className="h-24 w-full bg-[#1a1c23] animate-pulse"></div>
       
-      {/* Text Placeholder */}
-      <div className="p-3 flex flex-col flex-grow justify-between">
-        <div className="h-3 bg-[#2c303b] rounded-sm w-3/4"></div>
-        <div className="h-3 bg-[#2c303b] rounded-sm w-1/2 mt-2"></div>
+      {/* Text Area (p-3 matches the real card) */}
+      <div className="p-3 flex flex-col flex-grow">
+        {/* Fake Hero Name (h-4 matches text-sm) */}
+        <div className="h-4 bg-[#1a1c23] rounded-sm w-3/4 animate-pulse"></div>
+        
+        {/* Fake Bottom Row (matches the real flex row) */}
+        <div className="flex justify-between items-center mt-auto pt-2">
+          {/* Fake Attribute text */}
+          <div className="h-3 bg-[#1a1c23] rounded-sm w-8 animate-pulse"></div>
+          {/* Fake Win Rate text */}
+          <div className="h-4 bg-[#1a1c23] rounded-sm w-10 animate-pulse"></div>
+        </div>
       </div>
     </div>
   )
