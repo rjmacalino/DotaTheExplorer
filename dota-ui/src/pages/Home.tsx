@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 // Define what a Hero looks like based on OpenDota's data
 interface Hero {
@@ -208,6 +209,7 @@ function Home() {
         )}
         
       </div>
+      <Footer />
     </div>
   )
 }

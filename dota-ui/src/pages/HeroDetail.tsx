@@ -1,5 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import Footer from '../components/Footer'
+
 import {
   BarChart,
   Bar,
@@ -9,7 +12,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { useEffect } from "react";
+
 
 interface Hero {
   id: number;
@@ -287,6 +290,7 @@ export default function HeroDetail() {
           </table>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
