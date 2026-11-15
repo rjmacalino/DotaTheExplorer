@@ -1,0 +1,22 @@
+# ===== .NET / Backend =====
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ===== Node / React / Vite =====
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/build/
+**/.vite/
+**/coverage/
+*.local
+
+# ===== VS Code & OS =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
