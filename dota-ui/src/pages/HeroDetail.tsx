@@ -61,14 +61,39 @@ export default function HeroDetail() {
   })
   
 
-  // 1. Wait for the master hero list to load first
-  if (isHeroesLoading) return <div className="p-8 text-white">Loading hero data...</div>
-  
+  // 1. If ANYTHING is loading, show the detail page skeleton
+  if (isHeroesLoading || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0b0c10] p-8">
+        <div className="max-w-4xl mx-auto">
+          
+          {/* Fake Back Button */}
+          <div className="h-4 w-32 bg-[#1a1c23] rounded-sm animate-pulse mb-8"></div>
+
+          {/* Fake Hero Header */}
+          <div className="flex items-center gap-6 bg-[#15171e] border border-[#2c303b] p-6 rounded-sm mb-8">
+            <div className="w-32 h-20 bg-[#1a1c23] rounded-sm animate-pulse"></div>
+            <div>
+              <div className="h-10 w-48 bg-[#1a1c23] rounded-sm animate-pulse mb-2"></div>
+              <div className="h-4 w-16 bg-[#1a1c23] rounded-sm animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Fake Chart */}
+          <div className="h-6 w-64 bg-[#1a1c23] rounded-sm animate-pulse mb-4 mt-8"></div>
+          <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-80 w-full mb-8 animate-pulse"></div>
+
+          {/* Fake Table */}
+          <div className="h-6 w-32 bg-[#1a1c23] rounded-sm animate-pulse mb-4"></div>
+          <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-64 w-full animate-pulse"></div>
+
+        </div>
+      </div>
+    )
+  }
+
   // 2. If it's done loading and we still can't find the hero, THEN show not found
   if (!hero) return <div className="p-8 text-white">Hero not found.</div>
-  
-  // 3. Wait for the specific matchups to load
-  if (isLoading) return <div className="p-8 text-white">Loading matchups...</div>
 
   return (
     <div className="min-h-screen bg-[#0b0c10] p-8 text-white">
