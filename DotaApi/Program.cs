@@ -24,4 +24,11 @@ app.MapGet("/api/heroes", async (HttpClient httpClient) =>
     return Results.Ok(heroes);
 });
 
+app.MapGet("/api/heroes/{id}/matchups", async (int id, HttpClient httpClient) =>
+{
+    // OpenDota has a specific endpoint for matchups
+    var matchups = await httpClient.GetFromJsonAsync<object>($"https://api.opendota.com/api/heroes/{id}/matchups");
+    return Results.Ok(matchups);
+});
+
 app.Run();
