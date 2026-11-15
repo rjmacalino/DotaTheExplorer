@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { useEffect } from 'react'
 
 interface Hero {
   id: number
@@ -38,6 +39,15 @@ export default function HeroDetail() {
 
   // Find the specific hero we are looking at based on the URL id
   const hero = allHeroes.find((h) => h.id === Number(id))
+
+    // Update the title whenever the hero data loads or changes
+  useEffect(() => {
+    if (hero) {
+      document.title = `${hero.localized_name} | Dota 2 Meta Explorer`
+    } else {
+      document.title = 'Loading... | Dota 2 Meta Explorer'
+    }
+  }, [hero])
 
   // Transform the raw OpenDota data into an array Recharts can understand
   // Transform the raw OpenDota data into an array Recharts can understand

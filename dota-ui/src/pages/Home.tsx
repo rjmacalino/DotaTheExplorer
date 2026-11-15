@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 
@@ -26,6 +26,11 @@ function Home() {
       return res.json()
     },
   })
+
+  // Set the page title when this component mounts
+  useEffect(() => {
+    document.title = 'Dota 2 Meta Explorer'
+  }, [])
 
   // 2. CALCULATE FILTERED & SORTED HEROES
   const processedHeroes = useMemo(() => {
