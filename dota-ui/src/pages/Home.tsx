@@ -16,6 +16,7 @@ function Home() {
   // 1. ALL HOOKS MUST GO AT THE VERY TOP
   const [attributeFilter, setAttributeFilter] = useState('all_heroes')
   const [sortBy, setSortBy] = useState('alphabetical')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { data: heroes = [], isLoading, isError } = useQuery<Hero[]>({
     queryKey: ['heroes'],
@@ -28,9 +29,19 @@ function Home() {
 
   // 2. CALCULATE FILTERED & SORTED HEROES
   const processedHeroes = useMemo(() => {
-    const filtered = attributeFilter === 'all_heroes' 
-      ? heroes 
-      : heroes.filter((hero) => hero.primary_attr === attributeFilter)
+    const filtered = heroes.filter((hero) => {
+      // 1. Check attribute filter
+      const matchesAttribute = 
+        attributeFilter === 'all_heroes' || 
+        hero.primary_attr === attributeFilter
+
+      // 2. Check search query (case-insensitive)
+      const matchesSearch = 
+        hero.localized_name.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // Both must be true
+      return matchesAttribute && matchesSearch
+    })
 
     const getWinRate = (hero: Hero) => hero.pub_pick > 0 ? (hero.pub_win / hero.pub_pick) : 0
 
@@ -45,7 +56,7 @@ function Home() {
         default: return 0
       }
     })
-  }, [heroes, attributeFilter, sortBy])
+  }, [heroes, attributeFilter, sortBy, searchQuery])
 
   // 3. EARLY RETURNS (Must come AFTER all hooks)
   if (isLoading) return <div className="p-8 text-white">Loading heroes...</div>
@@ -62,7 +73,18 @@ function Home() {
             Dota 2 <span className="text-[#e3b04b]">Meta</span> Explorer
           </h1>
           
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          {/* 👇 THIS IS THE NEW CONTAINER 👇 */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+            
+            {/* ADD THIS SEARCH BAR */}
+            <input
+              type="text"
+              placeholder="Search heroes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-[#15171e] text-white text-sm border border-[#2c303b] rounded-sm px-3 py-1.5 outline-none focus:border-[#e3b04b] w-full lg:w-48 placeholder-gray-500"
+            />
+
             {/* Filter Buttons */}
             <div className="flex gap-2 flex-wrap">
               {[
@@ -98,6 +120,7 @@ function Home() {
               <option value="pick_rate_desc">Most Picked</option>
             </select>
           </div>
+          {/* 👆 END OF NEW CONTAINER 👆 */}
         </div>
         
         {/* The Grid */}
