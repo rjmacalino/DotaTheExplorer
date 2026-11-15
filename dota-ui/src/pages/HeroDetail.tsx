@@ -39,16 +39,16 @@ export default function HeroDetail() {
   // Find the specific hero we are looking at based on the URL id
   const hero = allHeroes.find((h) => h.id === Number(id))
 
-    // Transform the raw OpenDota data into an array Recharts can understand
+  // Transform the raw OpenDota data into an array Recharts can understand
+  // Transform the raw OpenDota data into an array Recharts can understand
   const bracketData = hero ? [
-    { name: 'Herald', winRate: hero["1_pick"] > 0 ? Number(((hero["1_win"] / hero["1_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Guardian', winRate: hero["2_pick"] > 0 ? Number(((hero["2_win"] / hero["2_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Crusader', winRate: hero["3_pick"] > 0 ? Number(((hero["3_win"] / hero["3_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Archon', winRate: hero["4_pick"] > 0 ? Number(((hero["4_win"] / hero["4_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Legend', winRate: hero["5_pick"] > 0 ? Number(((hero["5_win"] / hero["5_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Ancient', winRate: hero["6_pick"] > 0 ? Number(((hero["6_win"] / hero["6_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Divine', winRate: hero["7_pick"] > 0 ? Number(((hero["7_win"] / hero["7_pick"]) * 100).toFixed(1)) : 0 },
-    { name: 'Immortal', winRate: hero["8_pick"] > 0 ? Number(((hero["8_win"] / hero["8_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Herald', winRate: hero["1_pick"] ? Number(((hero["1_win"] / hero["1_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Guardian', winRate: hero["2_pick"] ? Number(((hero["2_win"] / hero["2_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Crusader', winRate: hero["3_pick"] ? Number(((hero["3_win"] / hero["3_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Archon', winRate: hero["4_pick"] ? Number(((hero["4_win"] / hero["4_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Legend', winRate: hero["5_pick"] ? Number(((hero["5_win"] / hero["5_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Ancient', winRate: hero["6_pick"] ? Number(((hero["6_win"] / hero["6_pick"]) * 100).toFixed(1)) : 0 },
+    { name: 'Divine', winRate: hero["7_pick"] ? Number(((hero["7_win"] / hero["7_pick"]) * 100).toFixed(1)) : 0 },
   ] : []
 
   // 2. Fetch the matchups for this specific hero
@@ -99,7 +99,16 @@ export default function HeroDetail() {
               <CartesianGrid strokeDasharray="3 3" stroke="#2c303b" vertical={false} />
               <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
               {/* We set the domain to [40, 60] so the variations are highly visible */}
-              <YAxis domain={[40, 60]} stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+                            {/* We set the domain AND ticks to force the 40-60 scale */}
+              <YAxis 
+                domain={[40, 60]} 
+                ticks={[40, 45, 50, 55, 60]} 
+                allowDataOverflow={true}
+                stroke="#6b7280" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+              />
               <Tooltip 
                 cursor={{ fill: '#1a1c23' }}
                 contentStyle={{ backgroundColor: '#0b0c10', borderColor: '#2c303b', color: '#fff' }}
