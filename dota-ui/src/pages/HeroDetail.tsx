@@ -78,7 +78,7 @@ export default function HeroDetail() {
   if (isHeroesLoading || isLoading) {
     return (
       <div className="min-h-screen bg-[#0b0c10] p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="h-4 w-32 bg-[#1a1c23] rounded-sm animate-pulse mb-8"></div>
           <div className="flex items-center gap-6 bg-[#15171e] border border-[#2c303b] p-6 rounded-sm mb-8">
             <div className="w-32 h-20 bg-[#1a1c23] rounded-sm animate-pulse"></div>
@@ -89,8 +89,10 @@ export default function HeroDetail() {
           </div>
           <div className="h-6 w-64 bg-[#1a1c23] rounded-sm animate-pulse mb-4 mt-8"></div>
           <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-80 w-full mb-8 animate-pulse"></div>
-          <div className="h-6 w-32 bg-[#1a1c23] rounded-sm animate-pulse mb-4"></div>
-          <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-64 w-full animate-pulse"></div>
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-64 w-full animate-pulse"></div>
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-64 w-full animate-pulse"></div>
+          </div>
         </div>
       </div>
     )
@@ -98,9 +100,27 @@ export default function HeroDetail() {
 
   if (!hero) return <div className="p-8 text-white">Hero not found.</div>
 
+  // Process matchups to attach opponent data and calculate exact win rate
+  const processedMatchups = matchups.map(m => {
+    const opponent = allHeroes.find(h => h.id === m.hero_id)
+    const winRate = (m.wins / m.games_played) * 100
+    return { ...m, opponent, winRate }
+  }).filter(m => m.opponent) // Filter out any weird IDs that don't have an opponent
+
+  // Split into Good and Bad, sort them appropriately, and take the top 10
+  const goodMatchups = [...processedMatchups]
+    .filter(m => m.winRate >= 50)
+    .sort((a, b) => b.winRate - a.winRate)
+    .slice(0, 10)
+
+  const badMatchups = [...processedMatchups]
+    .filter(m => m.winRate < 50)
+    .sort((a, b) => a.winRate - b.winRate)
+    .slice(0, 10)
+
   return (
     <div className="min-h-screen bg-[#0b0c10] p-8 text-white">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         
         <Link to="/" className="text-gray-400 hover:text-[#e3b04b] mb-8 inline-block text-sm uppercase tracking-wider font-bold">
           &larr; Back to Grid
@@ -132,11 +152,9 @@ export default function HeroDetail() {
         <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-gray-300 mt-8">Win Rate by Skill Bracket</h2>
         <div className="bg-[#15171e] border border-[#2c303b] rounded-sm p-4 h-80 w-full mb-8">
           <ResponsiveContainer width="100%" height="100%">
-            {/* Increased bottom margin to make room for bigger labels */}
             <BarChart data={bracketData} margin={{ top: 20, right: 10, left: -20, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2c303b" vertical={false} />
               
-              {/* Custom XAxis with bigger Rank Medals */}
               <XAxis 
                 dataKey="name" 
                 stroke="#6b7280" 
@@ -192,7 +210,6 @@ export default function HeroDetail() {
                 formatter={(value) => [`${value}%`, 'Win Rate']}
               />
               
-              {/* Bar with labels on top */}
               <Bar dataKey="winRate" fill="#e3b04b" radius={[2, 2, 0, 0]}>
                 <LabelList 
                   dataKey="winRate" 
@@ -207,52 +224,91 @@ export default function HeroDetail() {
           </ResponsiveContainer>
         </div>
 
-        {/* Matchups Table */}
-        <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-gray-300">Matchups</h2>
-        <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs">
-              <tr>
-                <th className="px-4 py-3">Opponent</th>
-                <th className="px-4 py-3 text-right">Games Played</th>
-                {/* Dynamic header */}
-                <th className="px-4 py-3 text-right">{hero.localized_name} Win Rate</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#2c303b]">
-              {matchups
-                .sort((a, b) => b.games_played - a.games_played)
-                .slice(0, 10)
-                .map((matchup) => {
-                  const opponent = allHeroes.find((h) => h.id === matchup.hero_id)
-                  const winRate = ((matchup.wins / matchup.games_played) * 100).toFixed(1)
-                  
-                  return (
+        {/* Matchups Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-12">
+          
+          {/* GOOD VERSUS */}
+          <div>
+            <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-emerald-500">Good Versus</h2>
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs">
+                  <tr>
+                    <th className="px-4 py-3">Opponent</th>
+                    <th className="px-4 py-3 text-right">Games</th>
+                    <th className="px-4 py-3 text-right">{hero.localized_name} WR</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2c303b]">
+                  {goodMatchups.map((matchup) => (
                     <tr key={matchup.hero_id} className="hover:bg-[#1a1c23] transition-colors">
                       <td className="px-4 py-3 font-semibold">
-                        {opponent && (
+                        {matchup.opponent && (
                           <Link 
-                            to={`/hero/${opponent.id}`} 
-                            className="flex items-center gap-3 hover:text-[#e3b04b] transition-colors group"
+                            to={`/hero/${matchup.opponent.id}`} 
+                            className="flex items-center gap-3 hover:text-emerald-400 transition-colors group"
                           >
                             <img
-                              src={`https://cdn.cloudflare.steamstatic.com${opponent.img}`}
-                              alt={opponent.localized_name}
-                              className="w-12 h-7 object-cover rounded-sm bg-black shadow-sm border border-[#2c303b] group-hover:border-[#e3b04b] transition-colors"
+                              src={`https://cdn.cloudflare.steamstatic.com${matchup.opponent.img}`}
+                              alt={matchup.opponent.localized_name}
+                              className="w-12 h-7 object-cover rounded-sm bg-black shadow-sm border border-[#2c303b] group-hover:border-emerald-400 transition-colors"
                             />
-                            {opponent.localized_name}
+                            {matchup.opponent.localized_name}
                           </Link>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right text-gray-400">{matchup.games_played.toLocaleString()}</td>
-                      <td className={`px-4 py-3 text-right font-mono font-bold ${Number(winRate) >= 50 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {winRate}%
+                      <td className="px-4 py-3 text-right font-mono font-bold text-emerald-500">
+                        {matchup.winRate.toFixed(1)}%
                       </td>
                     </tr>
-                  )
-                })}
-            </tbody>
-          </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* BAD VERSUS */}
+          <div>
+            <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-red-500">Bad Versus</h2>
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs">
+                  <tr>
+                    <th className="px-4 py-3">Opponent</th>
+                    <th className="px-4 py-3 text-right">Games</th>
+                    <th className="px-4 py-3 text-right">{hero.localized_name} WR</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2c303b]">
+                  {badMatchups.map((matchup) => (
+                    <tr key={matchup.hero_id} className="hover:bg-[#1a1c23] transition-colors">
+                      <td className="px-4 py-3 font-semibold">
+                        {matchup.opponent && (
+                          <Link 
+                            to={`/hero/${matchup.opponent.id}`} 
+                            className="flex items-center gap-3 hover:text-red-400 transition-colors group"
+                          >
+                            <img
+                              src={`https://cdn.cloudflare.steamstatic.com${matchup.opponent.img}`}
+                              alt={matchup.opponent.localized_name}
+                              className="w-12 h-7 object-cover rounded-sm bg-black shadow-sm border border-[#2c303b] group-hover:border-red-400 transition-colors"
+                            />
+                            {matchup.opponent.localized_name}
+                          </Link>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-400">{matchup.games_played.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-mono font-bold text-red-500">
+                        {matchup.winRate.toFixed(1)}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
       <Footer />
