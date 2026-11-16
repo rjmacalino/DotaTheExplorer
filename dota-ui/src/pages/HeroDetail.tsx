@@ -9,6 +9,7 @@ interface Hero {
   localized_name: string
   img: string
   primary_attr: string
+  // Public Stats
   "1_pick": number; "1_win": number;
   "2_pick": number; "2_win": number;
   "3_pick": number; "3_win": number;
@@ -17,6 +18,10 @@ interface Hero {
   "6_pick": number; "6_win": number;
   "7_pick": number; "7_win": number;
   "8_pick": number; "8_win": number;
+  // Pro Stats
+  pro_pick: number
+  pro_win: number
+  pro_ban: number
 }
 
 interface Matchup {
@@ -28,7 +33,6 @@ interface Matchup {
 export default function HeroDetail() {
   const { id } = useParams()
 
-  // Helper for attribute icons
   const getAttrIcon = (attr: string) => {
     switch (attr) {
       case 'str': return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_strength.png'
@@ -56,7 +60,6 @@ export default function HeroDetail() {
     }
   }, [hero])
 
-  // Transform the raw OpenDota data into an array Recharts can understand
   const bracketData = hero ? [
     { name: 'Herald', winRate: hero["1_pick"] ? Number(((hero["1_win"] / hero["1_pick"]) * 100).toFixed(1)) : 0 },
     { name: 'Guardian', winRate: hero["2_pick"] ? Number(((hero["2_win"] / hero["2_pick"]) * 100).toFixed(1)) : 0 },
@@ -66,6 +69,11 @@ export default function HeroDetail() {
     { name: 'Ancient', winRate: hero["6_pick"] ? Number(((hero["6_win"] / hero["6_pick"]) * 100).toFixed(1)) : 0 },
     { name: 'Divine', winRate: hero["7_pick"] ? Number(((hero["7_win"] / hero["7_pick"]) * 100).toFixed(1)) : 0 },
   ] : []
+
+  // Calculate Pro Win Rate
+  const proWinRate = hero && hero.pro_pick > 0 
+    ? ((hero.pro_win / hero.pro_pick) * 100).toFixed(1) 
+    : '0.0'
 
   const { data: matchups = [], isLoading } = useQuery<Matchup[]>({
     queryKey: ['matchups', id],
@@ -87,6 +95,11 @@ export default function HeroDetail() {
               <div className="h-4 w-16 bg-[#1a1c23] rounded-sm animate-pulse"></div>
             </div>
           </div>
+          <div className="grid grid-cols-3 gap-4 mb-8">
+             <div className="h-20 bg-[#15171e] border border-[#2c303b] rounded-sm animate-pulse"></div>
+             <div className="h-20 bg-[#15171e] border border-[#2c303b] rounded-sm animate-pulse"></div>
+             <div className="h-20 bg-[#15171e] border border-[#2c303b] rounded-sm animate-pulse"></div>
+          </div>
           <div className="h-6 w-64 bg-[#1a1c23] rounded-sm animate-pulse mb-4 mt-8"></div>
           <div className="bg-[#15171e] border border-[#2c303b] rounded-sm h-80 w-full mb-8 animate-pulse"></div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -100,23 +113,14 @@ export default function HeroDetail() {
 
   if (!hero) return <div className="p-8 text-white">Hero not found.</div>
 
-  // Process matchups to attach opponent data and calculate exact win rate
   const processedMatchups = matchups.map(m => {
     const opponent = allHeroes.find(h => h.id === m.hero_id)
     const winRate = (m.wins / m.games_played) * 100
     return { ...m, opponent, winRate }
-  }).filter(m => m.opponent) // Filter out any weird IDs that don't have an opponent
+  }).filter(m => m.opponent)
 
-  // Split into Good and Bad, sort them appropriately, and take the top 10
-  const goodMatchups = [...processedMatchups]
-    .filter(m => m.winRate >= 50)
-    .sort((a, b) => b.winRate - a.winRate)
-    .slice(0, 10)
-
-  const badMatchups = [...processedMatchups]
-    .filter(m => m.winRate < 50)
-    .sort((a, b) => a.winRate - b.winRate)
-    .slice(0, 10)
+  const goodMatchups = [...processedMatchups].filter(m => m.winRate >= 50).sort((a, b) => b.winRate - a.winRate)
+  const badMatchups = [...processedMatchups].filter(m => m.winRate < 50).sort((a, b) => a.winRate - b.winRate)
 
   return (
     <div className="min-h-screen bg-[#0b0c10] p-8 text-white">
@@ -127,7 +131,7 @@ export default function HeroDetail() {
         </Link>
 
         {/* Hero Header */}
-        <div className="flex items-center gap-6 bg-[#15171e] border border-[#2c303b] p-6 rounded-sm mb-8">
+        <div className="flex items-center gap-6 bg-[#15171e] border border-[#2c303b] p-6 rounded-sm mb-6">
           <img 
             src={`https://cdn.cloudflare.steamstatic.com${hero.img}`} 
             alt={hero.localized_name}
@@ -145,6 +149,24 @@ export default function HeroDetail() {
                 {hero.primary_attr === 'all' ? 'Universal' : hero.primary_attr}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Pro Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-[#15171e] border border-[#2c303b] p-4 rounded-sm flex flex-col justify-center items-center">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Pro Picks</p>
+            <p className="text-2xl font-mono font-bold text-white">{hero.pro_pick.toLocaleString()}</p>
+          </div>
+          <div className="bg-[#15171e] border border-[#2c303b] p-4 rounded-sm flex flex-col justify-center items-center">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Pro Bans</p>
+            <p className="text-2xl font-mono font-bold text-red-400">{hero.pro_ban.toLocaleString()}</p>
+          </div>
+          <div className="bg-[#15171e] border border-[#2c303b] p-4 rounded-sm flex flex-col justify-center items-center">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Pro Win Rate</p>
+            <p className={`text-2xl font-mono font-bold ${Number(proWinRate) >= 50 ? 'text-emerald-500' : 'text-red-500'}`}>
+              {proWinRate}%
+            </p>
           </div>
         </div>
 
@@ -230,9 +252,9 @@ export default function HeroDetail() {
           {/* GOOD VERSUS */}
           <div>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-emerald-500">Good Versus</h2>
-            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs">
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto">
+              <table className="w-full text-left text-sm relative">
+                <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs sticky top-0 z-10 shadow-md shadow-black/50">
                   <tr>
                     <th className="px-4 py-3">Opponent</th>
                     <th className="px-4 py-3 text-right">Games</th>
@@ -271,9 +293,9 @@ export default function HeroDetail() {
           {/* BAD VERSUS */}
           <div>
             <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-red-500">Bad Versus</h2>
-            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs">
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto">
+              <table className="w-full text-left text-sm relative">
+                <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs sticky top-0 z-10 shadow-md shadow-black/50">
                   <tr>
                     <th className="px-4 py-3">Opponent</th>
                     <th className="px-4 py-3 text-right">Games</th>
