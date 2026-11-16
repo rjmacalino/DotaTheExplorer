@@ -33,7 +33,7 @@ interface Matchup {
 export default function HeroDetail() {
   const { id } = useParams()
   
-  // NEW: State for minimum games filter
+  // State for minimum games filter
   const [minGames, setMinGames] = useState(1)
 
   const getAttrIcon = (attr: string) => {
@@ -174,7 +174,7 @@ export default function HeroDetail() {
         </div>
 
         {/* Win Rate by Bracket Chart */}
-        <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-gray-300 mt-8">Win Rate by Skill Bracket</h2>
+        <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-gray-300 mt-8 pl-4">Win Rate by Skill Bracket</h2>
         <div className="bg-[#15171e] border border-[#2c303b] rounded-sm p-4 h-80 w-full mb-8">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={bracketData} margin={{ top: 20, right: 10, left: -20, bottom: 40 }}>
@@ -275,9 +275,10 @@ export default function HeroDetail() {
         {/* Matchups Layout */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           
-          {/* GOOD VERSUS */}
+          {/* STRONG AGAINST */}
           <div>
-            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 text-emerald-500">Good Versus</h3>
+            {/* Added pl-4 here */}
+            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 pl-4 text-emerald-500">Strong Against</h3>
             <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-left text-sm relative">
                 <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs sticky top-0 z-10 shadow-md shadow-black/50">
@@ -322,9 +323,10 @@ export default function HeroDetail() {
             </div>
           </div>
 
-          {/* BAD VERSUS */}
+          {/* WEAK AGAINST */}
           <div>
-            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 text-red-500">Bad Versus</h3>
+            {/* Added pl-4 here */}
+            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 pl-4 text-red-500">Weak Against</h3>
             <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-left text-sm relative">
                 <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs sticky top-0 z-10 shadow-md shadow-black/50">
