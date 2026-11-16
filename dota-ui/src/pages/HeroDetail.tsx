@@ -242,7 +242,7 @@ export default function HeroDetail() {
                   fill="#e3b04b" 
                   fontSize={12} 
                   fontWeight="bold" 
-                  formatter={(value: number) => `${value}%`} 
+                  formatter={(value) => `${value}%`}
                 />
               </Bar>
             </BarChart>
