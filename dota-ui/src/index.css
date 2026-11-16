@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+/* Custom modern scrollbar for our dark theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Thin scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0b0c10; /* Matches page background */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2c303b; /* Matches borders */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #e3b04b; /* Gold on hover */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #2c303b #0b0c10;
+}

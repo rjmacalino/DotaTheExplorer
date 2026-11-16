@@ -1,15 +1,19 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Read the allowed origin from environment variables (fallback to localhost for development)
+var allowedOrigin = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:5173";
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins(allowedOrigin)
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
 });
+
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
@@ -26,7 +30,6 @@ app.MapGet("/api/heroes", async (HttpClient httpClient) =>
 
 app.MapGet("/api/heroes/{id}/matchups", async (int id, HttpClient httpClient) =>
 {
-    // OpenDota has a specific endpoint for matchups
     var matchups = await httpClient.GetFromJsonAsync<object>($"https://api.opendota.com/api/heroes/{id}/matchups");
     return Results.Ok(matchups);
 });

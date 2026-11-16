@@ -14,6 +14,16 @@ interface Hero {
 }
 
 function Home() {
+
+  const getAttrIcon = (attr: string) => {
+    switch (attr) {
+      case 'str': return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_strength.png'
+      case 'agi': return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_agility.png'
+      case 'int': return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_intelligence.png'
+      default: return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png'
+    }
+  }
+
   // 1. ALL HOOKS MUST GO AT THE VERY TOP
   const [attributeFilter, setAttributeFilter] = useState('all_heroes')
   const [sortBy, setSortBy] = useState('alphabetical')
@@ -164,8 +174,8 @@ function Home() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             {processedHeroes.map((hero) => {
-              const winRate = hero.pub_pick > 0 
-                ? ((hero.pub_win / hero.pub_pick) * 100).toFixed(1) 
+              const winRate = Number(hero.pub_pick) > 0 
+                ? ((Number(hero.pub_win) / Number(hero.pub_pick)) * 100).toFixed(1) 
                 : '0.0'
 
               const attrColor = 
@@ -195,6 +205,11 @@ function Home() {
                     
                     <div className="flex justify-between items-center mt-auto pt-2">
                       <span className={`text-xs font-bold uppercase ${attrColor}`}>
+                        <img 
+                          src={getAttrIcon(hero.primary_attr)} 
+                          alt={hero.primary_attr} 
+                          className="w-3.5 h-3.5 object-contain" 
+                        />
                         {hero.primary_attr === 'all' ? 'Univ' : hero.primary_attr}
                       </span>
                       <span className="text-gray-300 font-mono text-sm">
