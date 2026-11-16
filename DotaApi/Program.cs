@@ -1,5 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // Read the allowed origin from environment variables (fallback to localhost for development)
 var allowedOrigin = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:5173";
 
