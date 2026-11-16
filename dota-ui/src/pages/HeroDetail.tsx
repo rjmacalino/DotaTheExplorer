@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LabelList } from 'recharts'
 import Footer from '../components/Footer'
 
@@ -32,6 +32,9 @@ interface Matchup {
 
 export default function HeroDetail() {
   const { id } = useParams()
+  
+  // NEW: State for minimum games filter
+  const [minGames, setMinGames] = useState(1)
 
   const getAttrIcon = (attr: string) => {
     switch (attr) {
@@ -70,7 +73,6 @@ export default function HeroDetail() {
     { name: 'Divine', winRate: hero["7_pick"] ? Number(((hero["7_win"] / hero["7_pick"]) * 100).toFixed(1)) : 0 },
   ] : []
 
-  // Calculate Pro Win Rate
   const proWinRate = hero && hero.pro_pick > 0 
     ? ((hero.pro_win / hero.pro_pick) * 100).toFixed(1) 
     : '0.0'
@@ -117,7 +119,8 @@ export default function HeroDetail() {
     const opponent = allHeroes.find(h => h.id === m.hero_id)
     const winRate = (m.wins / m.games_played) * 100
     return { ...m, opponent, winRate }
-  }).filter(m => m.opponent)
+  })
+  .filter(m => m.opponent && m.games_played >= minGames)
 
   const goodMatchups = [...processedMatchups].filter(m => m.winRate >= 50).sort((a, b) => b.winRate - a.winRate)
   const badMatchups = [...processedMatchups].filter(m => m.winRate < 50).sort((a, b) => a.winRate - b.winRate)
@@ -246,13 +249,36 @@ export default function HeroDetail() {
           </ResponsiveContainer>
         </div>
 
+        {/* Matchups Header & Filter */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-12 mb-4 gap-4 border-b border-[#2c303b] pb-4">
+          <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-300">Matchups</h2>
+          
+          <div className="flex items-center gap-3">
+            <label htmlFor="minGames" className="text-sm text-gray-400 uppercase tracking-wider">
+              Min. Games Played
+            </label>
+            <select
+              id="minGames"
+              value={minGames}
+              onChange={(e) => setMinGames(Number(e.target.value))}
+              className="bg-[#15171e] text-gray-300 text-sm font-bold uppercase tracking-wider border border-[#2c303b] rounded-sm px-3 py-1.5 outline-none focus:border-[#e3b04b] cursor-pointer"
+            >
+              <option value="1">Any</option>
+              <option value="10">10+</option>
+              <option value="20">20+</option>
+              <option value="50">50+</option>
+              <option value="100">100+</option>
+            </select>
+          </div>
+        </div>
+
         {/* Matchups Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-12">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           
           {/* GOOD VERSUS */}
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-emerald-500">Good Versus</h2>
-            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto">
+            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 text-emerald-500">Good Versus</h3>
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-left text-sm relative">
                 <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs sticky top-0 z-10 shadow-md shadow-black/50">
                   <tr>
@@ -262,7 +288,7 @@ export default function HeroDetail() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2c303b]">
-                  {goodMatchups.map((matchup) => (
+                  {goodMatchups.length > 0 ? goodMatchups.map((matchup) => (
                     <tr key={matchup.hero_id} className="hover:bg-[#1a1c23] transition-colors">
                       <td className="px-4 py-3 font-semibold">
                         {matchup.opponent && (
@@ -284,7 +310,13 @@ export default function HeroDetail() {
                         {matchup.winRate.toFixed(1)}%
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                        No matchups found meeting the criteria.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -292,8 +324,8 @@ export default function HeroDetail() {
 
           {/* BAD VERSUS */}
           <div>
-            <h2 className="text-xl font-bold uppercase tracking-wider mb-4 text-red-500">Bad Versus</h2>
-            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto">
+            <h3 className="text-lg font-bold uppercase tracking-wider mb-3 text-red-500">Bad Versus</h3>
+            <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-left text-sm relative">
                 <thead className="bg-[#0b0c10] text-gray-400 uppercase text-xs sticky top-0 z-10 shadow-md shadow-black/50">
                   <tr>
@@ -303,7 +335,7 @@ export default function HeroDetail() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2c303b]">
-                  {badMatchups.map((matchup) => (
+                  {badMatchups.length > 0 ? badMatchups.map((matchup) => (
                     <tr key={matchup.hero_id} className="hover:bg-[#1a1c23] transition-colors">
                       <td className="px-4 py-3 font-semibold">
                         {matchup.opponent && (
@@ -325,7 +357,13 @@ export default function HeroDetail() {
                         {matchup.winRate.toFixed(1)}%
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                        No matchups found meeting the criteria.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
