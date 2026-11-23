@@ -31,6 +31,7 @@ function Home() {
 
   const { data: heroes = [], isLoading, isError } = useQuery<Hero[]>({
     queryKey: ['heroes'],
+    staleTime: 1000 * 60 * 60, // (1 hour)
     queryFn: async () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes`)
       if (!res.ok) throw new Error('Failed to fetch')
