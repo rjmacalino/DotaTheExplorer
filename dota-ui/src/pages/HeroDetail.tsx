@@ -51,6 +51,7 @@ export default function HeroDetail() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes`)
       return res.json()
     },
+    staleTime: 1000 * 60 * 60, // 1 hour
   })
 
   const hero = allHeroes.find((h) => h.id === Number(id))
@@ -83,6 +84,7 @@ export default function HeroDetail() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes/${id}/matchups`)
       return res.json()
     },
+    staleTime: 1000 * 60 * 60, // 1 hour
   })
 
   if (isHeroesLoading || isLoading) {
@@ -124,6 +126,10 @@ export default function HeroDetail() {
 
   const goodMatchups = [...processedMatchups].filter(m => m.winRate >= 50).sort((a, b) => b.winRate - a.winRate)
   const badMatchups = [...processedMatchups].filter(m => m.winRate < 50).sort((a, b) => a.winRate - b.winRate)
+  
+  const attrTitle = hero.primary_attr === 'all' ? 'Universal' : 
+                    hero.primary_attr === 'str' ? 'Strength' : 
+                    hero.primary_attr === 'agi' ? 'Agility' : 'Intelligence'
 
   return (
     <div className="min-h-screen bg-[#0b0c10] p-8 text-white">
@@ -142,15 +148,12 @@ export default function HeroDetail() {
           />
           <div>
             <h1 className="text-4xl font-bold uppercase tracking-wide">{hero.localized_name}</h1>
-            <div className="flex items-center gap-1.5 mt-1">
+            <div className="flex items-center gap-1.5 mt-1" title={attrTitle}>
               <img 
                 src={getAttrIcon(hero.primary_attr)} 
-                alt={hero.primary_attr} 
-                className="w-4 h-4 object-contain" 
+                alt={attrTitle} 
+                className="w-5 h-5 object-contain" 
               />
-              <p className="text-[#e3b04b] uppercase font-bold text-sm">
-                {hero.primary_attr === 'all' ? 'Universal' : hero.primary_attr}
-              </p>
             </div>
           </div>
         </div>
@@ -242,7 +245,7 @@ export default function HeroDetail() {
                   fill="#e3b04b" 
                   fontSize={12} 
                   fontWeight="bold" 
-                  formatter={(value) => `${value}%`}
+                  formatter={(value) => `${value}%`} 
                 />
               </Bar>
             </BarChart>
@@ -277,7 +280,6 @@ export default function HeroDetail() {
           
           {/* STRONG AGAINST */}
           <div>
-            {/* Added pl-4 here */}
             <h3 className="text-lg font-bold uppercase tracking-wider mb-3 pl-4 text-emerald-500">Strong Against</h3>
             <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-left text-sm relative">
@@ -325,7 +327,6 @@ export default function HeroDetail() {
 
           {/* WEAK AGAINST */}
           <div>
-            {/* Added pl-4 here */}
             <h3 className="text-lg font-bold uppercase tracking-wider mb-3 pl-4 text-red-500">Weak Against</h3>
             <div className="bg-[#15171e] border border-[#2c303b] rounded-sm max-h-[500px] overflow-y-auto custom-scrollbar">
               <table className="w-full text-left text-sm relative">

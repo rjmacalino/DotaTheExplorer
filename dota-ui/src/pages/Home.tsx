@@ -14,7 +14,27 @@ interface Hero {
 }
 
 function Home() {
+  // 1. ALL HOOKS MUST GO AT THE VERY TOP
+  const [attributeFilter, setAttributeFilter] = useState('all_heroes')
+  const [sortBy, setSortBy] = useState('alphabetical')
+  const [searchQuery, setSearchQuery] = useState('')
 
+  const { data: heroes = [], isLoading, isError } = useQuery<Hero[]>({
+    queryKey: ['heroes'],
+    queryFn: async () => {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes`)
+      if (!res.ok) throw new Error('Failed to fetch')
+      return res.json()
+    },
+    staleTime: 1000 * 60 * 60, // 1 hour
+  })
+
+  // Set the page title when this component mounts
+  useEffect(() => {
+    document.title = 'Dota 2 Meta Explorer'
+  }, [])
+
+  // Helper for attribute icons
   const getAttrIcon = (attr: string) => {
     switch (attr) {
       case 'str': return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_strength.png'
@@ -23,26 +43,6 @@ function Home() {
       default: return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/icons/hero_universal.png'
     }
   }
-
-  // 1. ALL HOOKS MUST GO AT THE VERY TOP
-  const [attributeFilter, setAttributeFilter] = useState('all_heroes')
-  const [sortBy, setSortBy] = useState('alphabetical')
-  const [searchQuery, setSearchQuery] = useState('')
-
-  const { data: heroes = [], isLoading, isError } = useQuery<Hero[]>({
-    queryKey: ['heroes'],
-    staleTime: 1000 * 60 * 60, // (1 hour)
-    queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/heroes`)
-      if (!res.ok) throw new Error('Failed to fetch')
-      return res.json()
-    },
-  })
-
-  // Set the page title when this component mounts
-  useEffect(() => {
-    document.title = 'Dota 2 Meta Explorer'
-  }, [])
 
   // 2. CALCULATE FILTERED & SORTED HEROES
   const processedHeroes = useMemo(() => {
@@ -76,7 +76,7 @@ function Home() {
   }, [heroes, attributeFilter, sortBy, searchQuery])
 
   // 3. EARLY RETURNS (Must come AFTER all hooks)
-    if (isLoading) return (
+  if (isLoading) return (
     <div className="min-h-screen bg-[#0b0c10] p-8">
       <div className="max-w-7xl mx-auto">
         {/* Fake Header */}
@@ -87,7 +87,6 @@ function Home() {
         
         {/* Fake Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-          {/* Render 32 skeleton cards to fill large screens */}
           {Array.from({ length: 32 }).map((_, index) => (
             <HeroCardSkeleton key={index} />
           ))}
@@ -111,10 +110,9 @@ function Home() {
             Dota 2 <span className="text-[#e3b04b]">Meta</span> Explorer
           </h1>
           
-          {/* 👇 THIS IS THE NEW CONTAINER 👇 */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
             
-            {/* ADD THIS SEARCH BAR */}
+            {/* Search Bar */}
             <input
               type="text"
               placeholder="Search heroes..."
@@ -158,7 +156,6 @@ function Home() {
               <option value="pick_rate_desc">Most Picked</option>
             </select>
           </div>
-          {/* 👆 END OF NEW CONTAINER 👆 */}
         </div>
 
         {/* The Grid */}
@@ -175,15 +172,13 @@ function Home() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             {processedHeroes.map((hero) => {
-              const winRate = Number(hero.pub_pick) > 0 
-                ? ((Number(hero.pub_win) / Number(hero.pub_pick)) * 100).toFixed(1) 
+              const winRate = hero.pub_pick > 0 
+                ? ((hero.pub_win / hero.pub_pick) * 100).toFixed(1) 
                 : '0.0'
 
-              const attrColor = 
-                hero.primary_attr === 'str' ? 'text-red-500' :
-                hero.primary_attr === 'agi' ? 'text-green-500' :
-                hero.primary_attr === 'int' ? 'text-blue-500' :
-                'text-gray-300'
+              const attrTitle = hero.primary_attr === 'all' ? 'Universal' : 
+                                hero.primary_attr === 'str' ? 'Strength' : 
+                                hero.primary_attr === 'agi' ? 'Agility' : 'Intelligence'
 
               return (
                 <Link
@@ -205,13 +200,13 @@ function Home() {
                     </h2>
                     
                     <div className="flex justify-between items-center mt-auto pt-2">
-                      <span className={`text-xs font-bold uppercase ${attrColor}`}>
+                      {/* Attribute Icon Only */}
+                      <span title={attrTitle} className="flex items-center">
                         <img 
                           src={getAttrIcon(hero.primary_attr)} 
-                          alt={hero.primary_attr} 
-                          className="w-3.5 h-3.5 object-contain" 
+                          alt={attrTitle} 
+                          className="w-4 h-4 object-contain opacity-80 hover:opacity-100 transition-opacity" 
                         />
-                        {hero.primary_attr === 'all' ? 'Univ' : hero.primary_attr}
                       </span>
                       <span className="text-gray-300 font-mono text-sm">
                         {winRate}%
@@ -233,21 +228,12 @@ function Home() {
 // A placeholder component that mimics the shape of a hero card
 function HeroCardSkeleton() {
   return (
-    // We copied the exact wrapper classes from the real card
     <div className="bg-[#15171e] border border-[#2c303b] rounded-sm overflow-hidden flex flex-col">
-      {/* Image Placeholder (h-24 matches the real image) */}
       <div className="h-24 w-full bg-[#1a1c23] animate-pulse"></div>
-      
-      {/* Text Area (p-3 matches the real card) */}
       <div className="p-3 flex flex-col flex-grow">
-        {/* Fake Hero Name (h-4 matches text-sm) */}
         <div className="h-4 bg-[#1a1c23] rounded-sm w-3/4 animate-pulse"></div>
-        
-        {/* Fake Bottom Row (matches the real flex row) */}
         <div className="flex justify-between items-center mt-auto pt-2">
-          {/* Fake Attribute text */}
-          <div className="h-3 bg-[#1a1c23] rounded-sm w-8 animate-pulse"></div>
-          {/* Fake Win Rate text */}
+          <div className="h-4 w-4 bg-[#1a1c23] rounded-sm animate-pulse"></div>
           <div className="h-4 bg-[#1a1c23] rounded-sm w-10 animate-pulse"></div>
         </div>
       </div>
